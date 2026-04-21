@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link id="theme-style" rel="stylesheet" href="LoginD.css">
+    <title>Tela de login</title>
+</head>
+<body>
+    <button onclick="toggleTheme()" id="toggle-btn" title="Trocar tema"></button>
+
+    <header>
+        <a href="LoginADM.html">
+            <button class="buttonj" type="button">Trabalha Conosco?</button>
+        </a>
+    </header>
+
+    <div class="box">
+        <h1>Login</h1>
+
+        <form id="formLogin" action="Test.php" method="POST">
+            <input type="text" id="loginCpf" name="CPF" placeholder="CPF" required>
+            <br><br>
+
+            <input type="password" id="loginSenha" name="Senha" placeholder="Senha" required>
+            <br><br>
+
+            <input class="inputSubmit" type="submit" name="submit" value="Enviar">
+        </form>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const link = document.getElementById('theme-style');
+            const currentTheme = link.getAttribute('href');
+            const btn = document.getElementById('toggle-btn');
+            document.body.classList.toggle('dark-theme');
+
+            if (currentTheme === 'LoginD.css') {
+                link.setAttribute('href', 'LoginL.css');
+                btn.innerHTML = getMoonIcon();
+                localStorage.setItem('theme', 'light');
+            } else {
+                link.setAttribute('href', 'LoginD.css');
+                btn.innerHTML = getSunIcon();
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        function getSunIcon() {
+            return `
+                <svg width="28" height="28" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <radialGradient id="sunGradient" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#FFD93B"/>
+                            <stop offset="100%" stop-color="#FFA500"/>
+                        </radialGradient>
+                    </defs>
+                    <circle cx="12" cy="12" r="5" fill="url(#sunGradient)"/>
+                    <g stroke="#FFA500" stroke-width="2">
+                        <line x1="12" y1="1" x2="12" y2="3"/>
+                        <line x1="12" y1="21" x2="12" y2="23"/>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                        <line x1="1" y1="12" x2="3" y2="12"/>
+                        <line x1="21" y1="12" x2="23" y2="12"/>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                    </g>
+                </svg>
+            `;
+        }
+
+        function getMoonIcon() {
+            return `
+                <svg width="28" height="28" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <radialGradient id="moonGradient" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#B0C4DE"/>
+                            <stop offset="100%" stop-color="#708090"/>
+                        </radialGradient>
+                    </defs>
+                    <path fill="url(#moonGradient)" d="M21 12.79A9 9 0 0111.21 3 7 7 0 0012 21a9 9 0 009-8.21z"/>
+                </svg>
+            `;
+        }
+
+        window.onload = () => {
+            const savedTheme = localStorage.getItem('theme');
+            const link = document.getElementById('theme-style');
+            const btn = document.getElementById('toggle-btn');
+
+            if (savedTheme === 'light') {
+                link.setAttribute('href', 'LoginL.css');
+                btn.innerHTML = getMoonIcon();
+            } else {
+                link.setAttribute('href', 'LoginD.css');
+                btn.innerHTML = getSunIcon();
+            }
+        };
+    </script>
+</body>
+</html>

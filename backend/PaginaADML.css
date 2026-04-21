@@ -1,0 +1,218 @@
+body {       
+    font-family: Arial, Helvetica, sans-serif;
+    background-image: linear-gradient(45deg, #ffffff, #dbe9f4);
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.navbar {
+    background: linear-gradient(to right, rgb(20, 147, 220), rgb(17, 54, 71));
+    color: #333;
+    padding: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    color: white !important;
+    font-weight: 700;
+    font-size: 1.5rem;
+    text-decoration: none;
+}
+
+header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40rem;
+    flex-wrap: wrap;
+    padding: .5rem;
+    background-image: linear-gradient(45deg, #fff, #cbdad5);
+    min-height: 10px;
+}
+
+.box-img-header {
+    height: 10%;
+}
+
+h1 {
+    text-align: center;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+}
+
+.box-search {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 2rem;
+}
+
+.box-search input[type="search"] {
+    padding: 10px 15px;
+    border: 1px solid white;
+    border-radius: 6px;
+    background-color: rgba(17, 54, 71, 0.8);
+    color: white;
+    width: 250px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.box-search input[type="search"]::placeholder {
+    color: #c0c0c0;
+}
+
+.box-search input[type="search"]:focus {
+    border-color: rgb(20, 147, 220);
+    outline: none;
+}
+
+.box-search button {
+    background-color: rgb(20, 147, 220);
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: white;
+    font-weight: 700;
+    transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.box-search button:hover {
+    background-color: rgb(17, 54, 71);
+}
+
+.table {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto 2rem auto;
+    border-collapse: collapse;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 15px 15px 0 0;
+    color: white;
+    box-shadow: 0 0 10px rgba(20, 147, 220, 0.3);
+    overflow: hidden;
+}
+
+.table thead {
+    background: linear-gradient(to right, rgb(20, 147, 220), rgb(17, 54, 71));
+}
+
+.table th, .table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    vertical-align: middle;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(20, 147, 220, 0.15);
+    cursor: pointer;
+}
+
+.btn-primary, .btn-danger {
+    font-size: 0.85rem;
+    padding: 4px 8px;
+    border: none;
+    border-radius: 6px;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.box-btn-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn-action {
+    background-color: transparent;
+    border: 2px solid #ffffff;
+    color: #ffffff;
+    border-radius: 60px;
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+    transition: 0.4s;
+}
+
+.input-box {
+    flex-direction: column;
+}
+
+:is(button, .link-action, .btn-action) {
+    padding: .6rem;
+    font-size: .9rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: .4s;
+}
+
+.btn-action {
+    background-color: transparent;
+    border: 1px solid var(#0c0c0c);
+    color: var(#0c0c0c);
+    border-radius: 60px;
+}
+
+.btn-action:hover {
+    background-color: var(#89a7b1);
+    border: 1px solid var(#89a7b1);
+}
+
+#botao-alternar {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+}
+
+#botao-alternar:hover {
+    transform: scale(1.1);
+}
+
+@media (max-width: 768px) {
+    .box-search {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .box-search input[type="search"] {
+        width: 60vw;
+    }
+
+    .table {
+        font-size: 0.9rem;
+    }
+}
+
+#toggle-btn {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1000;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}

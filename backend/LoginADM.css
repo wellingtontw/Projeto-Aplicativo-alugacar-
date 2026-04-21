@@ -1,0 +1,48 @@
+ /* Estilização geral do corpo da página */
+ body{       
+    font-family: Arial, Helvetica, sans-serif; /* Define a fonte do texto */
+    background-image: linear-gradient(45deg, #335c50,  #4f2f54,  #5c3339); /* Gradiente de fundo */
+}
+
+/* Estilização do contêiner do formulário de login */
+div{
+    background-color: rgba(0, 0, 0, 0.9); /* Fundo semi-transparente */
+    position: fixed; /* Posição absoluta na tela */
+    top:50%;
+    left:50%;
+    transform: translate(-50%, -50%); /* Centraliza o elemento na tela */
+    padding: 80px;
+    border-radius: 15px; /* Borda arredondada */
+    color: #ea7070; /* Cor do texto */
+}
+
+/* Estilização dos campos de entrada de texto */
+input{
+    padding: 15px;
+    border: none;
+    outline: none; /* Remove a borda ao focar no input */
+    font-size: 15px;
+}   
+
+/* Estilização do botão de envio */
+.inputSubmit{
+    background-color: transparent; /* Fundo transparente */
+    border: none;
+    padding: 15px;
+    width: 100%;
+    border-radius: 10px;
+    color: white;
+    font-size: 15px;
+    background-color: transparent;
+    border: 1px solid #fff; /* Borda branca */
+}
+
+/* Efeito ao passar o mouse sobre o botão */
+.inputSubmit:hover{
+    background-color: #ea7070; /* Altera a cor de fundo ao passar o mouse */
+    cursor: pointer;
+    padding: .8rem; /* Ajusta o padding */
+    font-size: 9px; /* Ajusta o tamanho da fonte (possível erro aqui, pode deixar 15px) */
+    border-radius: 6px;
+    transition: .4s;   /* Efeito de transição suave */
+}

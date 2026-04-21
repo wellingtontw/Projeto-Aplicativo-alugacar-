@@ -1,0 +1,346 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato');
+
+:root {
+    --white: #fff;
+    --dark1: #0c0c0c;
+    --dark2: #3a415a;
+    --dark3: #815656;
+    --dark4: #89a7b1;
+    --dark5: #cbdad5;
+    --red:   #ea7070;
+}
+#toggle-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.3rem;
+    border-radius: 0;
+    outline: none;
+}
+.carros-populares {
+    color: var(--white);
+}
+.card img {
+    width: 200%;
+    max-width: 450px;
+    height: auto;
+}
+.busca {
+    background-color: #1c1c1c;
+    padding: 2rem 1rem;
+    border-radius: 16px;
+    max-width: 500px;
+    margin: 2rem auto;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    color: #f1f1f1;
+}
+.busca h3 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    color: #ffffff;
+}
+.busca form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.busca label {
+    font-weight: bold;
+    margin-bottom: 0.2rem;
+    color: #dddddd;
+}
+.busca input {
+    padding: 0.6rem;
+    border: 1px solid #444;
+    border-radius: 8px;
+    font-size: 1rem;
+    background-color: #2a2a2a;
+    color: #f1f1f1;
+}
+.busca button {
+    background-color: #444;
+    color: #fff;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+.busca button:hover {
+    background-color: #666;
+}
+.erro {
+    color: #ff4d4d;
+    font-size: 0.9rem;
+    display: none;
+}
+form input[type="date"],
+form input[type="text"],
+form button {
+    width: 100%;
+    max-width: 470px;
+    padding: 12px 16px;
+    margin-bottom: 5px;
+    border: 1px solid var(--borda, #ccc);
+    border-radius: 8px;
+    font-size: 16px;
+    background-color: var(--campo-bg, #fff);
+    color: var(--campo-texto, #000);
+    transition: border-color 0.3s ease;
+}
+form input[type="date"]:focus,
+form input[type="text"]:focus {
+    border-color: var(--dark2, #007bff);
+    outline: none;
+}
+form button {
+    background-color: var(--dark2, #007bff);
+    color: #fff;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+form button:hover {
+    background-color: var(--dark2-hover, #0056b3);
+}
+* {
+    margin: 0;
+    padding: 0;
+    text-decoration: none;
+}
+::-webkit-scrollbar {
+    width: 10px;
+}
+::-webkit-scrollbar-track {
+    background: var(--dark2);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--dark3);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--dark4);
+}
+html {
+    scroll-behavior: smooth;
+}
+body {
+    background-color: var(--dark1);
+    background-size: 400%;
+    height: 100vh;
+    font-family: 'Lato';
+}
+header {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: .8rem;
+    background-image: linear-gradient(45deg, #0c0c0c, #3a415a);
+    min-height: 50px;
+}
+.box-img-header {
+    height: 100%;
+}
+.social-icons {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+.img-logo {
+    height: 100%;
+    max-height: 60px;
+}
+nav {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.nav-links {
+    color: var(--white);
+    font-size: 18px;
+    padding: 10px;
+    transition: color 0.3s ease, transform 0.2s;
+}
+.nav-links:hover {
+    color: var(--dark3);
+    transform: scale(1.1);
+}
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+}
+.box-btn-actions {
+    display: flex;
+    gap: 1rem;
+}
+.input-box {
+    flex-direction: column;
+}
+:is(button, .link-action, .btn-action) {
+    padding: .6rem;
+    font-size: .9rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: .4s;
+}
+.btn-action {
+    background-color: transparent;
+    border: 1px solid var(--white);
+    color: var(--white);
+    border-radius: 60px;
+}
+.btn-action:hover {
+    background-color: var(--dark3);
+    border: 1px solid var(--dark3);
+}
+main {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+section {
+    padding: 4rem;
+}
+.first-section {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    gap: 2rem;
+    min-height: 650px;
+    flex-wrap: wrap;
+}
+.first-section > div {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 300px;
+}
+.first-section p {
+    color: var(--white);
+}
+.first-section button {
+    width: 200px;
+}
+h1 {
+    font-size: 4rem;
+    letter-spacing: 8px;
+    color: var(--white);
+}
+strong {
+    color: var(--red);
+}
+.box-img-main {
+    max-width: 450px;
+    padding: 1rem;
+}
+.img-profile {
+    width: 100%;
+    border-radius: 50%;
+    box-shadow: 2px 1px 1px 1px var(--red);
+}
+:is(.second-section, .fourth-section) {
+    background-image: linear-gradient(45deg, #0c0c0c, #3a415a);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+}
+.title {
+    color: var(--dark5);
+}
+.second-section div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+.second-section p {
+    color: var(--dark4);
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+.second-section p:hover {
+    color: var(--dark5);
+    transition: .4s;
+    cursor: default;
+}
+.third-section {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+.third-section > div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4rem;
+    flex-wrap: wrap;
+}
+.third-section > div img {
+    width: 450px;
+    border-radius: 10px;
+}
+.third-section > div p {
+    max-width: 500px;
+    color: var(--white);
+}
+#my-projects-list {
+    display: flex;
+    gap: 2rem;
+    padding: 2rem;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+#my-projects-list a {
+    color: var(--dark3);
+}
+#my-projects-list a:hover {
+    transition: .4s;
+    color: var(--dark4);
+}
+footer {
+    padding: 4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+footer > div {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+@media (max-width: 768px) {
+    nav {
+        display: none;
+        flex-direction: column;
+        background: rgba(0, 0, 0, 0.9);
+        position: absolute;
+        top: 60px;
+        left: 0;
+        width: 100%;
+        text-align: center;
+        padding: 10px 0;
+    }
+    .menu-toggle {
+        display: block;
+    }
+    nav.show {
+        display: flex;
+    }
+}

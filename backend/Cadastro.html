@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link id="theme-style" rel="stylesheet" href="CadastroD.css" />
+    <title>Cadastro | AC</title>
+</head>
+<body>
+    <button onclick="toggleTheme()" id="toggle-btn" title="Trocar tema">
+        <svg width="28" height="28" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="5" fill="#FFA500" />
+            <g stroke="#FFA500" stroke-width="2">
+                <line x1="12" y1="1" x2="12" y2="3" />
+                <line x1="12" y1="21" x2="12" y2="23" />
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                <line x1="1" y1="12" x2="3" y2="12" />
+                <line x1="21" y1="12" x2="23" y2="12" />
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+            </g>
+        </svg>
+    </button>
+    <div class="box">
+        <form id="cadastroForm">
+            <legend><b>Cadastro</b></legend>
+            <br />
+            <div class="inputBox">
+                <input type="text" name="Nome" id="Nome" class="inputUser" required />
+                <label for="Nome" class="labelInput">Nome completo</label>
+            </div>
+            <br /><br />
+            <div class="inputBox">
+                <input type="text" name="Celular" id="Celular" class="inputUser" required />
+                <label for="Celular" class="labelInput">Celular</label>
+            </div>
+            <br /><br />
+            <div class="inputBox">
+                <input type="tel" name="CPF" id="CPF" class="inputUser" required />
+                <label for="CPF" class="labelInput">CPF</label>
+            </div>
+            <br /><br />
+            <div class="inputBox">
+                <input type="password" name="Senha" id="Senha" class="inputUser" required />
+                <label for="Senha" class="labelInput">Senha</label>
+            </div>
+            <br /><br />
+            <input type="submit" id="submit" value="Cadastrar" />
+        </form>
+    </div>
+    <script>
+        function toggleTheme() {
+            const link = document.getElementById("theme-style");
+            const currentTheme = link.getAttribute("href");
+            const btn = document.getElementById("toggle-btn");
+
+            document.body.classList.toggle("dark-theme");
+
+            if (currentTheme === "CadastroD.css") {
+                link.setAttribute("href", "CadastroL.css");
+                btn.innerHTML = `
+                    <svg width="28" height="28" xmlns="http://www.w3.org/2000/svg">
+                        <path fill="#708090" d="M21 12.79A9 9 0 0111.21 3 7 7 0 0012 21a9 9 0 009-8.21z"/>
+                    </svg>
+                `;
+                localStorage.setItem("theme", "light");
+            } else {
+                link.setAttribute("href", "CadastroD.css");
+                btn.innerHTML = `
+                    <svg width="28" height="28" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="5" fill="#FFA500" />
+                        <g stroke="#FFA500" stroke-width="2">
+                            <line x1="12" y1="1" x2="12" y2="3" />
+                            <line x1="12" y1="21" x2="12" y2="23" />
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                            <line x1="1" y1="12" x2="3" y2="12" />
+                            <line x1="21" y1="12" x2="23" y2="12" />
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                        </g>
+                    </svg>
+                `;
+                localStorage.setItem("theme", "dark");
+            }
+        }
+        window.onload = () => {
+            const savedTheme = localStorage.getItem("theme");
+            const link = document.getElementById("theme-style");
+            const btn = document.getElementById("toggle-btn");
+
+            if (savedTheme === "light") {
+                link.setAttribute("href", "CadastroL.css");
+                btn.innerHTML = `
+                    <svg width="28" height="28" xmlns="http://www.w3.org/2000/svg">
+                        <path fill="#708090" d="M21 12.79A9 9 0 0111.21 3 7 7 0 0012 21a9 9 0 009-8.21z"/>
+                    </svg>
+                `;
+            } else {
+                link.setAttribute("href", "CadastroD.css");
+                btn.innerHTML = `
+                    <svg width="28" height="28" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="5" fill="#FFA500" />
+                        <g stroke="#FFA500" stroke-width="2">
+                            <line x1="12" y1="1" x2="12" y2="3" />
+                            <line x1="12" y1="21" x2="12" y2="23" />
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                            <line x1="1" y1="12" x2="3" y2="12" />
+                            <line x1="21" y1="12" x2="23" y2="12" />
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                        </g>
+                    </svg>
+                `;
+            }
+        };
+         document.getElementById("cadastroForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const nome = document.getElementById("Nome").value.trim();
+            const celular = document.getElementById("Celular").value.trim();
+            const cpf = document.getElementById("CPF").value.trim();
+            const senha = document.getElementById("Senha").value.trim();
+
+            if (!nome || !celular || !cpf || !senha) {
+                alert("Por favor, preencha todos os campos.");
+                return;
+            }
+
+            let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+            if (usuarios.some(u => u.cpf === cpf)) {
+                alert("CPF já cadastrado!");
+                return;
+            }
+
+            const novoUsuario = { nome, celular, cpf, senha };
+            usuarios.push(novoUsuario);
+            localStorage.setItem("usuarios", JSON.stringify(usuarios));
+
+            alert("Cadastro realizado com sucesso!");
+            this.reset();
+            window.location.href = "Login.html";
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1276 @@
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final prefs = await SharedPreferences.getInstance();
+  final idCliente = prefs.getInt('idcliente');
+  final nomeCliente = prefs.getString('nome');
+
+  runApp(
+    AlugaCarApp(
+      idCliente: idCliente,
+      nomeCliente: nomeCliente,
+    ),
+  );
+}
+
+class AlugaCarApp extends StatelessWidget {
+  final int? idCliente;
+  final String? nomeCliente;
+
+  const AlugaCarApp({
+    super.key,
+    this.idCliente,
+    this.nomeCliente,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'AlugaCar',
+      theme: ThemeData(
+        scaffoldBackgroundColor: const Color(0xFFF5F5F5),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+        appBarTheme: const AppBarTheme(
+          centerTitle: true,
+          backgroundColor: Colors.deepPurple,
+          foregroundColor: Colors.white,
+        ),
+        cardTheme: const CardThemeData(
+          elevation: 6,
+          margin: EdgeInsets.zero,
+        ),
+      ),
+      home: idCliente != null && nomeCliente != null
+          ? HomePage(
+              idCliente: idCliente!,
+              nomeCliente: nomeCliente!,
+            )
+          : const SplashToLoginPage(),
+    );
+  }
+}
+
+class ApiConfig {
+  static String get baseApiUrl {
+    return 'http://192.168.0.53/alugacar/api';
+  }
+
+  static String get baseImageUrl {
+    return 'http://192.168.0.53/alugacar/';
+  }
+
+  static String imageUrl(String? path) {
+    if (path == null || path.isEmpty) {
+      return '${baseImageUrl}imagens/cronos.jpg';
+    }
+    return '$baseImageUrl$path';
+  }
+}
+
+class SplashToLoginPage extends StatefulWidget {
+  const SplashToLoginPage({super.key});
+
+  @override
+  State<SplashToLoginPage> createState() => _SplashToLoginPageState();
+}
+
+class _SplashToLoginPageState extends State<SplashToLoginPage> {
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(seconds: 2), () {
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginPage()),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        width: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF1E1E2F), Color(0xFF5E35B1)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.network(
+                '${ApiConfig.baseImageUrl}imagens/logo.png',
+                height: 100,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(
+                    Icons.directions_car_filled,
+                    size: 90,
+                    color: Colors.white,
+                  );
+                },
+              ),
+              const SizedBox(height: 18),
+              const Text(
+                'AlugaCar',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 34,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 14),
+              const CircularProgressIndicator(color: Colors.white),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController cpfController = TextEditingController();
+  final TextEditingController senhaController = TextEditingController();
+
+  bool carregando = false;
+  String mensagem = '';
+
+  Future<void> fazerLogin() async {
+    final cpf = cpfController.text.trim();
+    final senha = senhaController.text.trim();
+
+    if (cpf.isEmpty || senha.isEmpty) {
+      setState(() {
+        mensagem = 'Preencha CPF e senha.';
+      });
+      return;
+    }
+
+    setState(() {
+      carregando = true;
+      mensagem = '';
+    });
+
+    final url = Uri.parse('${ApiConfig.baseApiUrl}/login.php');
+
+    try {
+      final response = await http.post(
+        url,
+        body: {
+          'cpf': cpf,
+          'senha': senha,
+        },
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (data['sucesso'] == true) {
+        final cliente = data['cliente'];
+
+        final int idCliente = int.parse(cliente['idcliente'].toString());
+        final String nomeCliente = cliente['nome'].toString();
+
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setInt('idcliente', idCliente);
+        await prefs.setString('nome', nomeCliente);
+
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Login realizado com sucesso!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomePage(
+              idCliente: idCliente,
+              nomeCliente: nomeCliente,
+            ),
+          ),
+        );
+      } else {
+        setState(() {
+          mensagem = data['mensagem'] ?? 'Erro ao fazer login.';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        mensagem = 'Erro de conexão com a API.';
+      });
+    } finally {
+      setState(() {
+        carregando = false;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    cpfController.dispose();
+    senhaController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF1E1E2F), Color(0xFF5E35B1)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: Card(
+                elevation: 10,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(22),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Image.network(
+                        '${ApiConfig.baseImageUrl}imagens/logo.png',
+                        height: 90,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(
+                            Icons.directions_car_filled,
+                            size: 72,
+                            color: Colors.deepPurple,
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'AlugaCar',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Entre para continuar',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                      const SizedBox(height: 24),
+                      TextField(
+                        controller: cpfController,
+                        decoration: InputDecoration(
+                          labelText: 'CPF',
+                          prefixIcon: const Icon(Icons.badge_outlined),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: senhaController,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          labelText: 'Senha',
+                          prefixIcon: const Icon(Icons.lock_outline),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        height: 52,
+                        child: ElevatedButton(
+                          onPressed: carregando ? null : fazerLogin,
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          child: carregando
+                              ? const SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 3,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text(
+                                  'Entrar',
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      if (mensagem.isNotEmpty)
+                        Text(
+                          mensagem,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class HomePage extends StatefulWidget {
+  final int idCliente;
+  final String nomeCliente;
+
+  const HomePage({
+    super.key,
+    required this.idCliente,
+    required this.nomeCliente,
+  });
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  List carros = [];
+  bool carregando = true;
+  String mensagem = '';
+
+  Future<void> carregarCarros() async {
+    setState(() {
+      carregando = true;
+      mensagem = '';
+    });
+
+    final url = Uri.parse('${ApiConfig.baseApiUrl}/listar_carros.php');
+
+    try {
+      final response = await http.get(url);
+      final data = jsonDecode(response.body);
+
+      if (data['sucesso'] == true) {
+        setState(() {
+          carros = data['carros'];
+        });
+      } else {
+        setState(() {
+          mensagem = 'Erro ao carregar carros.';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        mensagem = 'Erro de conexão com a API.';
+      });
+    } finally {
+      setState(() {
+        carregando = false;
+      });
+    }
+  }
+
+  Future<void> sair() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+
+    if (!mounted) return;
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginPage()),
+      (route) => false,
+    );
+  }
+
+  Widget skeletonCard() {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            height: 180,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade300,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(height: 18, width: 140, color: Colors.grey.shade300),
+                const SizedBox(height: 10),
+                Container(height: 14, width: 100, color: Colors.grey.shade200),
+                const SizedBox(height: 8),
+                Container(height: 14, width: 80, color: Colors.grey.shade200),
+                const SizedBox(height: 8),
+                Container(height: 14, width: 70, color: Colors.grey.shade200),
+                const SizedBox(height: 14),
+                Container(height: 18, width: 90, color: Colors.grey.shade300),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    carregarCarros();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Olá, ${widget.nomeCliente}'),
+        actions: [
+          IconButton(
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MeusAlugueisPage(
+                    idCliente: widget.idCliente,
+                  ),
+                ),
+              );
+              carregarCarros();
+            },
+            icon: const Icon(Icons.receipt_long),
+            tooltip: 'Meus aluguéis',
+          ),
+          IconButton(
+            onPressed: carregarCarros,
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Atualizar',
+          ),
+          IconButton(
+            onPressed: sair,
+            icon: const Icon(Icons.logout),
+            tooltip: 'Sair',
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF311B92), Color(0xFF7E57C2)],
+              ),
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Carros disponíveis',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 6),
+                Text(
+                  'Escolha o veículo ideal para sua viagem',
+                  style: TextStyle(color: Colors.white70),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: carregando
+                ? GridView.builder(
+                    padding: const EdgeInsets.all(16),
+                    gridDelegate:
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 340,
+                      mainAxisSpacing: 16,
+                      crossAxisSpacing: 16,
+                      childAspectRatio: 0.68,
+                    ),
+                    itemCount: 4,
+                    itemBuilder: (context, index) => skeletonCard(),
+                  )
+                : mensagem.isNotEmpty
+                    ? Center(child: Text(mensagem))
+                    : carros.isEmpty
+                        ? const Center(child: Text('Nenhum carro disponível.'))
+                        : GridView.builder(
+                            padding: const EdgeInsets.all(16),
+                            gridDelegate:
+                                const SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: 340,
+                              mainAxisSpacing: 16,
+                              crossAxisSpacing: 16,
+                              childAspectRatio: 0.68,
+                            ),
+                            itemCount: carros.length,
+                            itemBuilder: (context, index) {
+                              final carro = carros[index];
+                              final imagemUrl = ApiConfig.imageUrl(
+                                carro['imagem']?.toString(),
+                              );
+
+                              return Card(
+                                elevation: 6,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: const BorderRadius.vertical(
+                                        top: Radius.circular(20),
+                                      ),
+                                      child: Image.network(
+                                        imagemUrl,
+                                        height: 180,
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                          return Container(
+                                            height: 180,
+                                            width: double.infinity,
+                                            color: Colors.grey.shade300,
+                                            child: const Icon(
+                                              Icons.directions_car,
+                                              size: 70,
+                                              color: Colors.grey,
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.all(14),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            carro['nome'].toString(),
+                                            style: const TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 10),
+                                          Text('Placa: ${carro['placa']}'),
+                                          Text('Cor: ${carro['cor']}'),
+                                          Text('Ano: ${carro['ano']}'),
+                                          const SizedBox(height: 10),
+                                          Text(
+                                            'R\$ ${carro['valor_diaria']} / dia',
+                                            style: const TextStyle(
+                                              color: Colors.deepPurple,
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 14),
+                                          SizedBox(
+                                            width: double.infinity,
+                                            child: ElevatedButton.icon(
+                                              onPressed: () async {
+                                                await Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        CarroDetalhesPage(
+                                                      idCliente:
+                                                          widget.idCliente,
+                                                      carro: carro,
+                                                    ),
+                                                  ),
+                                                );
+                                                carregarCarros();
+                                              },
+                                              icon: const Icon(Icons.visibility),
+                                              label:
+                                                  const Text('Ver detalhes'),
+                                              style: ElevatedButton.styleFrom(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        vertical: 14),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(14),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class CarroDetalhesPage extends StatelessWidget {
+  final int idCliente;
+  final Map carro;
+
+  const CarroDetalhesPage({
+    super.key,
+    required this.idCliente,
+    required this.carro,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final imagemUrl = ApiConfig.imageUrl(carro['imagem']?.toString());
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Detalhes do carro'),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Card(
+            elevation: 6,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(22),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(22)),
+                  child: Image.network(
+                    imagemUrl,
+                    height: 260,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        height: 260,
+                        color: Colors.grey.shade300,
+                        child: const Center(
+                          child: Icon(
+                            Icons.directions_car,
+                            size: 80,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(18),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        carro['nome'].toString(),
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      Text('Placa: ${carro['placa']}'),
+                      Text('Cor: ${carro['cor']}'),
+                      Text('Ano: ${carro['ano']}'),
+                      const SizedBox(height: 10),
+                      Text(
+                        'Diária: R\$ ${carro['valor_diaria']}',
+                        style: const TextStyle(
+                          color: Colors.deepPurple,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      const Text(
+                        'Descrição',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Veículo disponível para locação com conforto, segurança e praticidade. Ideal para viagens, trabalho e uso diário.',
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 54,
+            child: ElevatedButton.icon(
+              onPressed: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AlugarCarroPage(
+                      idCliente: idCliente,
+                      carro: carro,
+                    ),
+                  ),
+                );
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
+              },
+              icon: const Icon(Icons.shopping_cart_checkout),
+              label: const Text('Ir para aluguel'),
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class AlugarCarroPage extends StatefulWidget {
+  final int idCliente;
+  final Map carro;
+
+  const AlugarCarroPage({
+    super.key,
+    required this.idCliente,
+    required this.carro,
+  });
+
+  @override
+  State<AlugarCarroPage> createState() => _AlugarCarroPageState();
+}
+
+class _AlugarCarroPageState extends State<AlugarCarroPage> {
+  final TextEditingController retiradaController = TextEditingController();
+  final TextEditingController devolucaoController = TextEditingController();
+  final TextEditingController localController = TextEditingController();
+
+  bool carregando = false;
+  String mensagem = '';
+
+  Future<void> alugarCarro() async {
+    final retirada = retiradaController.text.trim();
+    final devolucao = devolucaoController.text.trim();
+    final local = localController.text.trim();
+
+    if (retirada.isEmpty || devolucao.isEmpty || local.isEmpty) {
+      setState(() {
+        mensagem = 'Preencha todos os campos.';
+      });
+      return;
+    }
+
+    setState(() {
+      carregando = true;
+      mensagem = '';
+    });
+
+    final url = Uri.parse('${ApiConfig.baseApiUrl}/alugar_carro.php');
+
+    try {
+      final response = await http.post(
+        url,
+        body: {
+          'idcliente': widget.idCliente.toString(),
+          'idveiculo': widget.carro['idveiculo'].toString(),
+          'retirada': retirada,
+          'devolucao': devolucao,
+          'local': local,
+        },
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (data['sucesso'] == true) {
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Aluguel realizado com sucesso!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        Navigator.pop(context);
+      } else {
+        setState(() {
+          mensagem = data['mensagem'] ?? 'Erro ao alugar carro.';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        mensagem = 'Erro de conexão com a API.';
+      });
+    } finally {
+      setState(() {
+        carregando = false;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    retiradaController.dispose();
+    devolucaoController.dispose();
+    localController.dispose();
+    super.dispose();
+  }
+
+  Future<void> selecionarData(TextEditingController controller) async {
+    final agora = DateTime.now();
+    final data = await showDatePicker(
+      context: context,
+      initialDate: agora,
+      firstDate: agora,
+      lastDate: DateTime(2030),
+    );
+
+    if (data != null) {
+      final texto =
+          '${data.year.toString().padLeft(4, '0')}-'
+          '${data.month.toString().padLeft(2, '0')}-'
+          '${data.day.toString().padLeft(2, '0')}';
+
+      controller.text = texto;
+      setState(() {});
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final carroNome = widget.carro['nome'].toString();
+    final imagemUrl = ApiConfig.imageUrl(widget.carro['imagem']?.toString());
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Reservar carro'),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Card(
+            elevation: 6,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(18)),
+                  child: Image.network(
+                    imagemUrl,
+                    height: 220,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        height: 220,
+                        color: Colors.grey.shade300,
+                        child: const Center(
+                          child: Icon(
+                            Icons.directions_car,
+                            size: 80,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
+                    carroNome,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: retiradaController,
+            readOnly: true,
+            decoration: InputDecoration(
+              labelText: 'Data de retirada',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              prefixIcon: const Icon(Icons.date_range),
+            ),
+            onTap: () => selecionarData(retiradaController),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: devolucaoController,
+            readOnly: true,
+            decoration: InputDecoration(
+              labelText: 'Data de devolução',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              prefixIcon: const Icon(Icons.event_available),
+            ),
+            onTap: () => selecionarData(devolucaoController),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: localController,
+            decoration: InputDecoration(
+              labelText: 'Local',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              prefixIcon: const Icon(Icons.location_on_outlined),
+            ),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 52,
+            child: ElevatedButton.icon(
+              onPressed: carregando ? null : alugarCarro,
+              icon: const Icon(Icons.check_circle_outline),
+              label: carregando
+                  ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text('Confirmar aluguel'),
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          if (mensagem.isNotEmpty)
+            Text(
+              mensagem,
+              style: const TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class MeusAlugueisPage extends StatefulWidget {
+  final int idCliente;
+
+  const MeusAlugueisPage({
+    super.key,
+    required this.idCliente,
+  });
+
+  @override
+  State<MeusAlugueisPage> createState() => _MeusAlugueisPageState();
+}
+
+class _MeusAlugueisPageState extends State<MeusAlugueisPage> {
+  List alugueis = [];
+  bool carregando = true;
+  String mensagem = '';
+
+  Future<void> carregarAlugueis() async {
+    setState(() {
+      carregando = true;
+      mensagem = '';
+    });
+
+    final url = Uri.parse(
+      '${ApiConfig.baseApiUrl}/meus_alugueis.php?idcliente=${widget.idCliente}',
+    );
+
+    try {
+      final response = await http.get(url);
+      final data = jsonDecode(response.body);
+
+      if (data['sucesso'] == true) {
+        setState(() {
+          alugueis = data['alugueis'];
+        });
+      } else {
+        setState(() {
+          mensagem = data['mensagem'] ?? 'Erro ao carregar aluguéis.';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        mensagem = 'Erro de conexão com a API.';
+      });
+    } finally {
+      setState(() {
+        carregando = false;
+      });
+    }
+  }
+
+  Future<void> cancelarAluguel(int idaluguel) async {
+    final url = Uri.parse('${ApiConfig.baseApiUrl}/cancelar_aluguel.php');
+
+    try {
+      final response = await http.post(
+        url,
+        body: {
+          'idaluguel': idaluguel.toString(),
+        },
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (data['sucesso'] == true) {
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Aluguel cancelado com sucesso!'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+
+        carregarAlugueis();
+      } else {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(data['mensagem'] ?? 'Erro ao cancelar aluguel.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Erro de conexão com a API.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Color corStatus(String status) {
+    switch (status.toLowerCase()) {
+      case 'ativo':
+        return Colors.green;
+      case 'cancelado':
+        return Colors.red;
+      case 'finalizado':
+        return Colors.blue;
+      default:
+        return Colors.orange;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    carregarAlugueis();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ativos = alugueis.where((a) => a['status'] == 'Ativo').toList();
+    final outros = alugueis.where((a) => a['status'] != 'Ativo').toList();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Meus aluguéis'),
+      ),
+      body: carregando
+          ? ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: 3,
+              itemBuilder: (context, index) => Card(
+                elevation: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                child: Container(height: 140),
+              ),
+            )
+          : mensagem.isNotEmpty
+              ? Center(child: Text(mensagem))
+              : alugueis.isEmpty
+                  ? const Center(child: Text('Nenhum aluguel encontrado.'))
+                  : ListView(
+                      padding: const EdgeInsets.all(16),
+                      children: [
+                        if (ativos.isNotEmpty) ...[
+                          const Text(
+                            'Ativos',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          ...ativos.map((aluguel) => aluguelCard(aluguel)),
+                          const SizedBox(height: 24),
+                        ],
+                        if (outros.isNotEmpty) ...[
+                          const Text(
+                            'Histórico',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          ...outros.map((aluguel) => aluguelCard(aluguel)),
+                        ],
+                      ],
+                    ),
+    );
+  }
+
+  Widget aluguelCard(Map aluguel) {
+    final status = aluguel['status'].toString();
+    final idaluguel = int.parse(aluguel['idaluguel'].toString());
+
+    return Card(
+      elevation: 5,
+      margin: const EdgeInsets.only(bottom: 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              aluguel['carro'].toString(),
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                Chip(
+                  label: Text(status),
+                  backgroundColor: corStatus(status).withOpacity(0.15),
+                  labelStyle: TextStyle(
+                    color: corStatus(status),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Chip(
+                  label: Text(aluguel['pagamento'].toString()),
+                ),
+              ],
+            ),
+            const Divider(height: 24),
+            Text('Placa: ${aluguel['placa']}'),
+            Text('Retirada: ${aluguel['retirada']}'),
+            Text('Devolução: ${aluguel['devolucao']}'),
+            const SizedBox(height: 8),
+            Text(
+              'Valor: R\$ ${aluguel['valor_total']}',
+              style: const TextStyle(
+                color: Colors.deepPurple,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (status == 'Ativo') ...[
+              const SizedBox(height: 14),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () => cancelarAluguel(idaluguel),
+                  icon: const Icon(Icons.cancel_outlined),
+                  label: const Text('Cancelar aluguel'),
+                ),
+              ),
+            ]
+          ],
+        ),
+      ),
+    );
+  }
+}
