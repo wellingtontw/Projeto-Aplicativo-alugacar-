@@ -59,11 +59,11 @@ class AlugaCarApp extends StatelessWidget {
 
 class ApiConfig {
   static String get baseApiUrl {
-    return 'http://192.168.0.53/alugacar/api';
+    return 'http://alugacarapp.infinityfreeapp.com/api';
   }
 
   static String get baseImageUrl {
-    return 'http://192.168.0.53/alugacar/';
+    return 'http://alugacarapp.infinityfreeapp.com/';
   }
 
   static String imageUrl(String? path) {

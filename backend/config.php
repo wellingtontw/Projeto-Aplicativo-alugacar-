@@ -1,15 +1,19 @@
 <?php
-$dbHost = '127.0.0.1';
+// TEMPORÁRIO até criar banco online
+$dbHost = 'localhost';
 $dbUsername = 'root';
 $dbPassword = '';
 $dbName = 'alugacar';
-$dbPort = 3307;
+$port = 3306;
 
-$conexao = new mysqli($dbHost, $dbUsername, $dbPassword, $dbName, $dbPort);
+$conexao = @new mysqli($dbHost, $dbUsername, $dbPassword, $dbName, $port);
 
 if ($conexao->connect_error) {
-    die("Erro na conexão: " . $conexao->connect_error);
+    // não derruba a API, só retorna mensagem
+    echo json_encode([
+        "sucesso" => false,
+        "mensagem" => "Banco ainda não configurado"
+    ]);
+    exit;
 }
-
-$conexao->set_charset("utf8mb4");
 ?>
