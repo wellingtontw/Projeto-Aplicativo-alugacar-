@@ -1,18 +1,20 @@
 <?php
-// TEMPORÁRIO até criar banco online
-$dbHost = 'localhost';
-$dbUsername = 'root';
-$dbPassword = '';
-$dbName = 'alugacar';
-$port = 3306;
+mysqli_report(MYSQLI_REPORT_OFF);
 
-$conexao = @new mysqli($dbHost, $dbUsername, $dbPassword, $dbName, $port);
+$dbHost = 'tramway.proxy.rlwy.net';
+$dbUsername = 'root';
+$dbPassword = 'usJugAuzsSNpkGEAroRWEQVCtWdycOls';
+$dbName = 'railway';
+$port = 28070;
+
+$conexao = new mysqli($dbHost, $dbUsername, $dbPassword, $dbName, $port);
 
 if ($conexao->connect_error) {
-    // não derruba a API, só retorna mensagem
+    header('Content-Type: application/json; charset=utf-8');
     echo json_encode([
         "sucesso" => false,
-        "mensagem" => "Banco ainda não configurado"
+        "mensagem" => "Erro ao conectar no banco de dados.",
+        "erro" => $conexao->connect_error
     ]);
     exit;
 }
