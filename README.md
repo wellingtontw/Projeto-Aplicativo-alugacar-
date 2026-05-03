@@ -82,6 +82,10 @@ Nome do APK:
 
 alugacar_app.apk
 
+Link para baixar apk 
+
+https://github.com/wellingtontw/Projeto-Aplicativo-alugacar-/releases/tag/1.0 
+
 
 ### 📥 Como instalar
 
