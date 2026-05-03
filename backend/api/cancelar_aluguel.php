@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$idaluguel = isset($_POST['idaluguel']) ? (int) $_POST['idaluguel'] : 0;
+$idaluguel = isset($_POST['idaluguel']) ? intval($_POST['idaluguel']) : 0;
 
 if ($idaluguel <= 0) {
     echo json_encode([
@@ -20,8 +20,7 @@ if ($idaluguel <= 0) {
     exit;
 }
 
-/* buscar aluguel */
-$sqlBusca = "SELECT idveiculo, status_aluguel FROM alugueis WHERE idaluguel = ?";
+$sqlBusca = "SELECT idveiculo FROM alugueis WHERE idaluguel = ?";
 $stmtBusca = $conexao->prepare($sqlBusca);
 $stmtBusca->bind_param("i", $idaluguel);
 $stmtBusca->execute();
@@ -36,36 +35,36 @@ if ($resultBusca->num_rows === 0) {
 }
 
 $aluguel = $resultBusca->fetch_assoc();
-$idveiculo = (int)$aluguel['idveiculo'];
+$idveiculo = intval($aluguel['idveiculo']);
 
-if ($aluguel['status_aluguel'] === 'Cancelado') {
+$sqlCancela = "UPDATE alugueis 
+               SET status = 'Cancelado',
+                   status_aluguel = 'Cancelado'
+               WHERE idaluguel = ?";
+
+$stmtCancela = $conexao->prepare($sqlCancela);
+$stmtCancela->bind_param("i", $idaluguel);
+
+if (!$stmtCancela->execute()) {
     echo json_encode([
         'sucesso' => false,
-        'mensagem' => 'Este aluguel já foi cancelado.'
+        'mensagem' => 'Erro ao cancelar aluguel.',
+        'erro' => $conexao->error
     ]);
     exit;
 }
 
-/* cancelar aluguel */
-$sqlUpdate = "UPDATE alugueis SET status_aluguel = 'Cancelado' WHERE idaluguel = ?";
-$stmtUpdate = $conexao->prepare($sqlUpdate);
-$stmtUpdate->bind_param("i", $idaluguel);
+$sqlVeiculo = "UPDATE veiculo 
+               SET disponivel = 1,
+                   status_veiculo = 'Disponível'
+               WHERE idveiculo = ?";
 
-if ($stmtUpdate->execute()) {
-    /* liberar veículo novamente */
-    $sqlVeiculo = "UPDATE veiculos SET disponivel = 1, status_veiculo = 'Disponível' WHERE idveiculo = ?";
-    $stmtVeiculo = $conexao->prepare($sqlVeiculo);
-    $stmtVeiculo->bind_param("i", $idveiculo);
-    $stmtVeiculo->execute();
+$stmtVeiculo = $conexao->prepare($sqlVeiculo);
+$stmtVeiculo->bind_param("i", $idveiculo);
+$stmtVeiculo->execute();
 
-    echo json_encode([
-        'sucesso' => true,
-        'mensagem' => 'Aluguel cancelado com sucesso.'
-    ]);
-} else {
-    echo json_encode([
-        'sucesso' => false,
-        'mensagem' => 'Erro ao cancelar aluguel.'
-    ]);
-}
+echo json_encode([
+    'sucesso' => true,
+    'mensagem' => 'Aluguel cancelado com sucesso.'
+]);
 ?>
